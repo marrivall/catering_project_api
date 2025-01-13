@@ -1,0 +1,10 @@
+- Viewing the menu and services 
+- Display of recommended dishes for the event chosen by the client
+- Saving selected dishes and removing them,  removing and adding certain ingredients to dishes
+- Setting the time for when the order should be received
+- Receive notifications about the order status
+- Payment for services on the website
+- Communication with the customer support using the website chat and interaction with the contact information through the link
+- Menu calculation: input name, phone number/mail address, number of people, date of event, choose the type of event from the specified list, duration of the event and comment
+- Selecting location 
+- Writing and reading reviews (automatically sets the date and time of writing), or sending a message to the client after the event to rate the services 
