@@ -137,21 +137,34 @@ class Scheduler:
             else:
                 self.ship_order(order[0])
                 
-    def worker(self):
+    def remove_archived_orders(self):
         while True:
-            for key, value in list(STORAGE["delivery"].items()):
-                status, updated_at = value[1], value[2]
-                arc_time = datetime.now()-updated_at
-                if status == "archived" and arc_time.total_seconds()>60:
-                    del STORAGE['delivery'][key]
-                    print(f"Archived order {key} is removed")
+            try:
+                for key, value in list(STORAGE["delivery"].items()):
+                    if isinstance(value, list) and len(value) > 2:
+                        status, updated_at = value[1], value[2]
+                        arc_time = datetime.now()-updated_at
+                        if status == "archived" and arc_time.total_seconds()>60:
+                            del STORAGE['delivery'][key]
+                            print(f"Archived order {key} is removed")
+                    else:
+                        if key in STORAGE['delivery']:
+                            delivery_items = STORAGE['delivery'][key]
+                            print(f"Orders for {key}: {delivery_items}")
+            except KeyError as e:
+                print(f"No orders for key {key} .")
+            except ValueError as e:
+                print(f"ValueError: {e}.") 
+            except Exception as e:
+                print(f"Error: {e}.")
+                
 
 # ENTRYPOINT
 def main():
     scheduler = Scheduler()
     threading.Thread(target=scheduler.process_orders, daemon=True).start()
     threading.Thread(target=DeliveryService._process_delivery, daemon=True).start()
-    threading.Thread(target=scheduler.worker, daemon=True).start()
+    threading.Thread(target=scheduler.remove_archived_orders, daemon=True).start()
 
     while True:
         if order_details := input("Enter order details: "):
