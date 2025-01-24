@@ -1,10 +1,8 @@
-- Viewing the menu and services 
-- Display of recommended dishes for the event chosen by the client
-- Saving selected dishes and removing them,  removing and adding certain ingredients to dishes
-- Setting the time for when the order should be received
-- Receive notifications about the order status
-- Payment for services on the website
-- Communication with the customer support using the website chat and interaction with the contact information through the link
-- Menu calculation: input name, phone number/mail address, number of people, date of event, choose the type of event from the specified list, duration of the event and comment
-- Selecting location 
-- Writing and reading reviews (automatically sets the date and time of writing), or sending a message to the client after the event to rate the services 
+HOW TO RUN THE APPLICATION
+If the Python extension is not installed:
+1) Install python extension: Ctrl+Shift+X and choose "Python"
+2) Interpreter settings: Ctrl+Shift+P  -> Python: select interpreter -> Python
+3) Run the file:
+    - Select the Python file and click "Run Python File" button in right corner
+    - Open Terminal, enter "python file_name.py"
+    - Right-click in the file, click "Run Python File in Terminal"
