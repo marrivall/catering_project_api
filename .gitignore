@@ -72,6 +72,7 @@ __pypackages__/
 .venv
 env/
 venv/
+venv
 ENV/
 env.bak/
 venv.bak/
@@ -87,4 +88,5 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-
+.idea/
+.vscode/
