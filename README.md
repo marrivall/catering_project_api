@@ -1,8 +1,9 @@
-HOW TO RUN THE APPLICATION
-If the Python extension is not installed:
-1) Install python extension: Ctrl+Shift+X and choose "Python"
-2) Interpreter settings: Ctrl+Shift+P  -> Python: select interpreter -> Python
-3) Run the file:
-    - Select the Python file and click "Run Python File" button in right corner
-    - Open Terminal, enter "python file_name.py"
-    - Right-click in the file, click "Run Python File in Terminal"
+1)  the guide to load test data from your fixtures files. 
+- Create new directory named 'fixtures' by the command 'mkdir fixtures' or in the Explorer
+- Create test data file inside of the 'fixtures', foe example 'file_name.json'
+- Open 'file_name.json' file and add test data to it
+- If the encoding is not UTF-8, change it and save the file.
+- Save file and enter the command in the terminal 'python manage.py loaddata file_name.json'
+
+2) Explain why you chose either JSON or CSV format.
+I chose JSON because it makes model relationships easier to manage, it is also suitable for working with complex and diverse data and structures. It makes it easier to process in web applications that often need to process different types of information
