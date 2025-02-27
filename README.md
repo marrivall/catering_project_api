@@ -7,3 +7,6 @@
 
 2) Explain why you chose either JSON or CSV format.
 I chose JSON because it makes model relationships easier to manage, it is also suitable for working with complex and diverse data and structures. It makes it easier to process in web applications that often need to process different types of information
+
+-------   MY DESCISION---------------
+I chose ModelViewSet because it automatically provides CRUD operations, which reduces the amount of code. It also makes it easier to add new features and functions  

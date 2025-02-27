@@ -1,27 +1,28 @@
 from django.contrib import admin
-from .models import Dish, Restaurant, DishesOrder, DishOrderItem
+from django.http.response import HttpResponseRedirect
+from .models import Dish, Restaurant, Order, DishOrderItem
 
 admin.site.register(Restaurant)
 
 
+def import_csv(self, request, queryset):
+    print("testing import CSV custom action")
+    return HttpResponseRedirect("/import-dishes")
+
 @admin.register(Dish)
 class DishAdmin(admin.ModelAdmin):
     list_display = ("name", "price", "restaurant")
-    search_fields = ("name", "price", "restaurant")
-    list_filter = ("price" , "restaurant")
-
+    search_fields = ("name",)
+    list_filter = ("name", "restaurant")
+    actionss = ["import_csv"]
 
 class DishOrderItemInline(admin.TabularInline):
     model = DishOrderItem
-    fields = ("quantity", "dish", "order_external_id")
 
-    def order_external_id(self, obj):
-        return obj.order.external_order_id
-    order_external_id.short_description = "External Order ID"
-    
 
-@admin.register(DishesOrder)
+@admin.register(Order)
 class DishesOrderAdmin(admin.ModelAdmin):
     inlines = (DishOrderItemInline,)
-    list_display = ("external_order_id", "user")
-    search_fields = ("external_order_id", "user__username")
+
+
+admin.site.add_action(import_csv)
