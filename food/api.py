@@ -3,11 +3,18 @@ from rest_framework import status, viewsets, routers, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Dish, DishOrderItem, Order, Restaurant
-from .serializers import DishSerializer, OrderSerializer, RestaurantSerializer
+from .serializers import DishSerializer, OrderCreateSerializer, RestaurantSerializer
 from .enums import OrderStatus
+from rest_framework.generics import get_object_or_404
+from orders.processor import Processor
 
 
-class FoodAPIViewSet(viewsets.GenericViewSet):
+
+class FoodAPIViewSet(viewsets.ModelViewSet):
+    queryset = Dish.objects.all()
+    serializer_class = DishSerializer
+    permission_classes = [permissions.AllowAny]
+
     #HTTP GET/food/dishes
     @action(methods=["get"], detail=False)
     def dishes(self, request):
@@ -21,14 +28,16 @@ class FoodAPIViewSet(viewsets.GenericViewSet):
     def orders(self, request: WSGIRequest):
 
 
-        serializer = OrderSerializer(data=request.data)
+        serializer = OrderCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         if not isinstance(serializer.validated_data, dict):
             raise ValueError(...)
 
-        order = Order.objects.create(status=OrderStatus.NOT_STARTED, user=request.user)
-        print(f"New Food Order is created: {order.pk}")
+        order = Order.objects.create(
+            status=OrderStatus.NOT_STARTED, user=request.user, eta=serializer.validated_data["eta"]
+            )
+        print(f"New Food Order is created: {order.pk}\nETA: {order.eta}")
 
         try:
             dishes_order = serializer.validated_data["food"]
@@ -41,47 +50,54 @@ class FoodAPIViewSet(viewsets.GenericViewSet):
             )
             print(f"New Dish Order Item is created: {instance.pk}")
 
-        return Response(
-            data = serializer.data,
+        cache_service = CacheService()
+        cached_orders = cache_service.get("orders", "cached_orders") 
+        cached_orders[order.id] = {"id": order.id, "status": order.status, "eta": str(order.eta)}
+        cache_service.set("orders", "cached_orders", cached_orders, ttl=None)
+
+
+        return Response(data={
+                "id": order.pk,
+                "status": order.status,
+                "eta": order.eta,
+                "total": 9999,
+            },
             status=status.HTTP_201_CREATED,
-        )
+            )
 
 
 #---------------------------------------------------------------
 #Restaurants 
 #---------------------------------------------------------------
 
-class RestaurantAPIViewSet(viewsets.ModelViewSet):
-    queryset = Restaurant.objects.all()
-    serializer_class = RestaurantSerializer
-    permission_classes = [permissions.AllowAny]
-
-#HTTP GET/restaurants
-    def list(self, request):
-        restaurants = self.get_queryset()
-        serializer = self.get_serializer(restaurants, many=True)
+    @action(methods=["get"], detail=False)
+    def restaurants(self, request):
+        restaurants = Restaurant.objects.all()
+        serializer = RestaurantSerializer(restaurants, many=True)
         return Response(data=serializer.data)
-
-#HTTP POST /restaurants
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
+    
+    # HTTP POST /food/restaurants/
+    @action(methods=["post"], detail=False)
+    def create_restaurant(self, request):
+        serializer = RestaurantSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         restaurant = serializer.save()
         return Response(
-            data = serializer.data,
+            data=serializer.data,
             status=status.HTTP_201_CREATED,
         )
     
-#HTTP GET /restaurants/ID
-    def retrieve(self, request, pk=None):
-        restaurant = Restaurant.objects.get(pk=pk)
-        serializer = self.get_serializer(restaurant)
-        return Response(data = serializer.data, status=status.HTTP_200_OK)
+    # HTTP GET /food/restaurants/{pk}/
+    @action(methods=["get"], detail=False, url_path='restaurants/(?P<restaurant_pk>[^/.]+)')
+    def retrieve_restaurant(self, request, restaurant_pk=None):
+        restaurant = get_object_or_404(Restaurant, pk=restaurant_pk)
+        serializer = RestaurantSerializer(restaurant)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
     
-    #get certain resntaurant's dishes
-    @action(detail=True, methods=['get'])
-    def dishes(self, request, pk=None):
-        restaurant = Restaurant.objects.get(pk=pk)
+    # HTTP GET /food/restaurants/{pk}/dishes/
+    @action(methods=["get"], detail=True, url_path='restaurants/(?P<restaurant_pk>[^/.]+)/dishes')
+    def restaurant_dishes(self, request, restaurant_pk=None):
+        restaurant = get_object_or_404(Restaurant, pk=restaurant_pk)
         dishes = restaurant.dishes.all()
         serializer = DishSerializer(dishes, many=True)
         return Response(serializer.data)
@@ -89,4 +105,3 @@ class RestaurantAPIViewSet(viewsets.ModelViewSet):
 
 food_router = routers.DefaultRouter()
 food_router.register(r"food", FoodAPIViewSet, basename="food")
-food_router.register(r"restaurants", RestaurantAPIViewSet, basename="restaurants")
