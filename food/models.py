@@ -32,8 +32,8 @@ class Order(models.Model):
     status = models.CharField(max_length=20)
     provider = models.CharField(max_length=20, null=True, blank=True)
     eta = models.DateField()
-    external_id_1 = models.CharField(max_length=200, null=True, blank=True)
-    external_id_2 = models.CharField(max_length=200, null=True, blank=True)
+    external_id_bueno = models.CharField(max_length=200, null=True, blank=True)
+    external_id_melange = models.CharField(max_length=200, null=True, blank=True)
     restaurant = models.ForeignKey(Restaurant, null=True, on_delete=models.CASCADE)
 
     user = models.ForeignKey(
@@ -63,6 +63,8 @@ class DishOrderItem(models.Model):
 class OrderProcessing(models.Model):
     order = models.ForeignKey("Order", on_delete=models.CASCADE)
     external_id = models.CharField(max_length=200, unique=True, null=True, blank=True)
+    external_id_bueno = models.CharField(max_length=200, null=True, blank=True)
+    external_id_melange = models.CharField(max_length=200, null=True, blank=True)
     restaurant = models.ForeignKey("Restaurant", on_delete=models.CASCADE) 
     status = models.CharField(max_length=50, default="not_started")
 

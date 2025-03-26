@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 import uuid
 from rest_framework.routers import DefaultRouter
 
+
 class FoodAPIViewSet(viewsets.ModelViewSet):
     queryset = Dish.objects.all()
     serializer_class = DishSerializer
